@@ -8,7 +8,7 @@ const validateUserPayload = async (req, res, next) => {
     next()
   } catch (err) {
     next({
-      status: 400,
+      status: 422,
       message: err.errors[0]
     })
   }
