@@ -4,7 +4,7 @@ const validateUserPayload = async (req, res, next) => {
   try {
     const payload = req.body
     const validatedPayload = await userSchema.validate(payload)
-    req.custom_newUser = validatedPayload
+    req.custom_user = validatedPayload
     next()
   } catch (err) {
     next({
