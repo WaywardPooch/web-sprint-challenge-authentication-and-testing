@@ -5,7 +5,7 @@ const checkUsernameExists = async (req, res, next) => {
   const users = await User.filterBy({ username })
   if (users.length === 0) {
     next({
-      status: 400,
+      status: 401,
       message: "invalid credentials"
     })
   } else {
@@ -19,7 +19,7 @@ const checkUsernameTaken = async (req, res, next) => {
   const users = await User.filterBy({ username })
   if (users.length !== 0) {
     next({
-      status: 400,
+      status: 401,
       message: "username taken"
     })
   } else {
