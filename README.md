@@ -22,7 +22,7 @@ Users must be able to call the `[POST] /api/auth/register` endpoint to create a 
 
 We also need to make sure nobody without the token can call `[GET] /api/jokes` and gain access to our dad jokes.
 
-We will hash the user's password using `bcryptjs`, and use JSON Web Tokens and the `jsonwebtoken` library.
+We will hash the user's password using `bcryptjs` , and use JSON Web Tokens and the `jsonwebtoken` library.
 
 ### MVP
 
@@ -35,7 +35,7 @@ Your finished project must include all of the following requirements (further in
 **IMPORTANT Notes:**
 
 - Do not exceed 2^8 rounds of hashing with `bcryptjs`.
-- If you use environment variables make sure to provide fallbacks in the code (e.g. `process.env.SECRET || "shh"`).
+- If you use environment variables make sure to provide fallbacks in the code (e.g. `process.env. SECRET || "shh"`).
 - You are welcome to create additional files but **do not move or rename existing files** or folders.
 - Do not alter your `package.json` file except to install extra libraries. Do not update existing packages.
 - The database already has the `users` table, but if you run into issues, the migration is available.
@@ -54,6 +54,27 @@ Your finished project must include all of the following requirements (further in
 Be prepared to demonstrate your understanding of this week's concepts by answering questions on the following topics.
 
 1. Differences between using _sessions_ or _JSON Web Tokens_ for authentication.
+
+  With **sessions-based authentication**, the server is responsible for keeping track of whether users are logged in or not, and the authentication method is reliant on cookies, making it almost exclusively usable in browser or browser-like environments, only. With **JSON Web Tokens**, the server sends a token to a client, and the client is responsible for saving it locally so that the logged-in state can be remembered.
+
+  The advantages of the token based approach mostly come down to compatibility with a wider range of hardware/software, but a drawback is that tokens have a lifetime of whatever they were assigned upon creation, and cannot be invalidated outside of making a blacklist containing all the tokens to be voided, which is time consuming. A cookie, however, can be invalidated by the server at the server's discretion, though that means the server will need to have a system in place to keep track of all currently signed-in users, which can get annoying as your server starts to scale up.
+
 2. What does `bcryptjs` do to help us store passwords in a secure manner?
+
+  `bcryptjs` is a library that allows us to create and compare password hashes so we can scramble passwords for storage, instead of saving them in plain text. As a server manager, storing passwords in plain text is horrible practice, as if our database gets hacked, the hackers will end up having the login information of all our users -- a horrible security situation!
+
 3. How are unit tests different from integration and end-to-end testing?
+
+  - **Unit tests** are for ensuring individual units of our code function correctly in isolation.
+  - **Integration tests** are for verifying that multiple different units of code work together as expected.
+  - **End-to-end tests** are for testing our application front-to-back in the manner that a user would interact with it.
+
 4. How does _Test Driven Development_ change the way we write applications and tests?
+
+  **Test Driven Development** is a process where developers write tests for features they plan to implement _before_ actually creating said features in the first place. It is a 3-part process, which goes as follows:
+
+  1. **RED PHASE** - The developer writes a test for a feature they want to implement; because this feature is not yet a reality, the test fails, which is where it gets its name from. The goal is to think about things that can go wrong, accounting for edge cases ahead of time. There is a limit to this, though, as according to true TDD standards, a developer should only write as much test code as it takes for the test to fail.
+
+  2. **GREEN PHASE** - The developer shifts to writing production code, with the goal of only writing enough code to make their test in the RED PHASE pass.
+
+  3. **REFACTORING PHASE** - With a working test, and functional production code, the developer is now free to reformat and improve their production code, with the sound knowledge that should they make a mistake or break their code in any way, their test will inform them of the problem right when it arises, preventing most errors from going unnoticed, assuming the test was good in the first place.
