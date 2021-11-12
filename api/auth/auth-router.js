@@ -1,33 +1,54 @@
-const router = require('express').Router();
+const router = require("express").Router()
+const bcrypt = require("bcryptjs")
 
-router.post('/register', (req, res) => {
-  res.end('implement register, please!');
-  /*
-    IMPLEMENT
-    You are welcome to build additional middlewares to help with the endpoint's functionality.
-    DO NOT EXCEED 2^8 ROUNDS OF HASHING!
+const { BCRYPT_ROUNDS } = require("../../config")
+const User = require("../users/users-model")
+// const restricted = require("../middleware/restricted")
+const validateUserPayload = require("../middleware/validate-user-payload")
+const checkUsernameTaken = require("../middleware/check-username-taken")
 
-    1- In order to register a new account the client must provide `username` and `password`:
-      {
-        "username": "Captain Marvel", // must not exist already in the `users` table
-        "password": "foobar"          // needs to be hashed before it's saved
-      }
+router.post("/register",
+  validateUserPayload,
+  checkUsernameTaken,
+  async (req, res, next) => {
+    /*
+      IMPLEMENT
+      You are welcome to build additional middlewares to help with the endpoint's functionality.
+      DO NOT EXCEED 2^8 ROUNDS OF HASHING!
 
-    2- On SUCCESSFUL registration,
-      the response body should have `id`, `username` and `password`:
-      {
-        "id": 1,
-        "username": "Captain Marvel",
-        "password": "2a$08$jG.wIGR2S4hxuyWNcBf9MuoC4y0dNy7qC/LbmtuFBSdIhWks2LhpG"
-      }
+      1- In order to register a new account the client must provide `username` and `password`:
+        {
+          "username": "Captain Marvel", // must not exist already in the `users` table
+          "password": "foobar"          // needs to be hashed before it's saved
+        }
 
-    3- On FAILED registration due to `username` or `password` missing from the request body,
-      the response body should include a string exactly as follows: "username and password required".
+      2- On SUCCESSFUL registration,
+        the response body should have `id`, `username` and `password`:
+        {
+          "id": 1,
+          "username": "Captain Marvel",
+          "password": "2a$08$jG.wIGR2S4hxuyWNcBf9MuoC4y0dNy7qC/LbmtuFBSdIhWks2LhpG"
+        }
 
-    4- On FAILED registration due to the `username` being taken,
-      the response body should include a string exactly as follows: "username taken".
-  */
-});
+      3- On FAILED registration due to `username` or `password` missing from the request body,
+        the response body should include a string exactly as follows: "username and password required".
+
+      4- On FAILED registration due to the `username` being taken,
+        the response body should include a string exactly as follows: "username taken".
+    */
+
+    try {
+      let payload = req.custom_newUser
+      const hash = bcrypt.hashSync(payload.password, BCRYPT_ROUNDS)
+      payload.password = hash
+
+      const newUser = await User.add(payload)
+      res.status(201).json(newUser)
+    } catch (err) {
+      next(err)
+    }
+  }
+)
 
 router.post('/login', (req, res) => {
   res.end('implement login, please!');
