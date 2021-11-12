@@ -41,21 +41,65 @@ describe("[POST] /api/auth/register", () => {
     })
   })
   describe("failure", () => {
-    let login
-    beforeEach(() => {
-      login = { username: "ulfric-stormcloak" }
-    })
-
     it("responds with status code 422 when payload is invalid", async () => {
       const expected = 422
+      const login = { username: "ulfric-stormcloak" }
       const res = await request(server).post("/api/auth/register").send(login)
       const actual = res.status
       expect(actual).toBe(expected)
     })
     it("returns 'username and password required' when either is missing", async () => {
-      const errorMessage = "username and password required"
-      const expected = errorMessage
+      const expected = "username and password required"
+      const login = { username: "ulfric-stormcloak" }
       const res = await request(server).post("/api/auth/register").send(login)
+      const actual = res.body.message
+      expect(actual).toBe(expected)
+    })
+    it("returns 'username taken' when desired username already exists", async () => {
+      const expected = "username taken"
+      const login = { username: "john-henry", password: "was-a-mighty-man" }
+      const res = await request(server).post("/api/auth/register").send(login)
+      const actual = res.body.message
+      expect(actual).toBe(expected)
+    })
+  })
+})
+
+describe("[POST] /api/auth/login", () => {
+  describe("success", () => {
+    let login
+    beforeEach(() => {
+      login = { username: "john-henry", password: "henry" }
+    })
+
+    it("responds with status code 200 when credentials are valid", async () => {
+      const expected = 200
+      const res = await request(server).post("/api/auth/login").send(login)
+      const actual = res.status
+      expect(actual).toBe(expected)
+    })
+    it("returns a welcome message and token on success", async () => {
+      const welcomeMessage = "welcome, john-henry"
+      const res = await request(server).post("/api/auth/login").send(login)
+      expect(res.body.message).toBe(welcomeMessage)
+      expect(res.body).toHaveProperty("token")
+    })
+  })
+  describe("failure", () => {
+    let login
+    beforeEach(() => {
+      login = { username: "paul-bunyan", password: "badwrong" }
+    })
+
+    it("responds with status code 401 when credentails are invalid", async () => {
+      const expected = 401
+      const res = await request(server).post("/api/auth/login").send(login)
+      const actual = res.status
+      expect(actual).toBe(expected)
+    })
+    it("returns 'invalid credentials' when credentials are invalid", async () => {
+      const expected = "invalid credentials"
+      const res = await request(server).post("/api/auth/login").send(login)
       const actual = res.body.message
       expect(actual).toBe(expected)
     })
