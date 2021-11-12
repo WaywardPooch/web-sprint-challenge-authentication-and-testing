@@ -1,19 +1,31 @@
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
+// Libraries
+const express = require("express")
+const cors = require("cors")
+const helmet = require("helmet")
 
-const restrict = require('./middleware/restricted.js');
+// Custom Middleware
+const logger = require("./middleware/logger")
+const restrict = require("./middleware/restricted")
+const handleError = require("./middleware/handle-error")
 
-const authRouter = require('./auth/auth-router.js');
-const jokesRouter = require('./jokes/jokes-router.js');
+// Routers
+const authRouter = require("./auth/auth-router")
+const jokesRouter = require("./jokes/jokes-router")
 
-const server = express();
+// Server Instantiation
+const server = express()
 
-server.use(helmet());
-server.use(cors());
-server.use(express.json());
+// Middleware Application
+server.use(helmet())
+server.use(cors())
+server.use(express.json())
 
-server.use('/api/auth', authRouter);
-server.use('/api/jokes', restrict, jokesRouter); // only logged-in users should have access!
+server.use(logger)
 
-module.exports = server;
+server.use('/api/auth', authRouter)
+server.use('/api/jokes', restrict, jokesRouter) // only logged-in users should have access!
+
+server.use(handleError)
+
+// Server Export
+module.exports = server
