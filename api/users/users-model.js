@@ -12,6 +12,12 @@ const getById = async (id) => {
   return user
 }
 
+const filterBy = async (filter) => {
+  const user = await db("users")
+    .where(filter)
+  return user
+}
+
 const add = async (user) => {
   const [id] = await db("users")
     .insert(user)
@@ -22,5 +28,6 @@ const add = async (user) => {
 module.exports = {
   getAll,
   getById,
+  filterBy,
   add
 }
