@@ -2,6 +2,7 @@ const request = require("supertest")
 
 const server = require("./server")
 const db = require("../data/dbConfig")
+const jokesData = require("./jokes/jokes-data")
 
 beforeAll(async () => {
   await db.migrate.rollback()
@@ -100,6 +101,51 @@ describe("[POST] /api/auth/login", () => {
     it("returns 'invalid credentials' when credentials are invalid", async () => {
       const expected = "invalid credentials"
       const res = await request(server).post("/api/auth/login").send(login)
+      const actual = res.body.message
+      expect(actual).toBe(expected)
+    })
+  })
+})
+
+describe("[GET] /api/jokes", () => {
+  describe("success", () => {
+    let headers
+    beforeEach(async () => {
+      const loginRes = await request(server).post("/api/auth/login")
+        .send({ username: "johnny-appleseed", password: "appleseed" })
+      headers = { Authorization: loginRes.body.token }
+    })
+
+    it("responds with status code 200 when authenticated", async () => {
+      const expected = 200
+      const res = await request(server).get("/api/jokes").set(headers)
+      const actual = res.status
+      expect(actual).toBe(expected)
+    })
+    it("returns all dad jokes from the database", async () => {
+      const expected = [...jokesData]
+      const res = await request(server).get("/api/jokes").set(headers)
+      const actual = res.body
+      expect(actual).toEqual(expected)
+    })
+  })
+  describe("failure", () => {
+    it("responds with status code 401 when token is missing/invalid", async () => {
+      const expected = 401
+      const res = await request(server).get("/api/jokes")
+      const actual = res.status
+      expect(actual).toBe(expected)
+    })
+    it("returns 'token required' when token is missing", async () => {
+      const expected = "token required"
+      const res = await request(server).get("/api/jokes")
+      const actual = res.body.message
+      expect(actual).toBe(expected)
+    })
+    it("returns 'token invalid' when token is invalid", async () => {
+      const expected = "token invalid"
+      const res = await request(server).get("/api/jokes")
+        .set({ Authorization: "jeremy-soule-is-a-musical-genius" })
       const actual = res.body.message
       expect(actual).toBe(expected)
     })
